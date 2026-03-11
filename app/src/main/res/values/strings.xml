@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Helloworld</string>
+    <string name="secondActivity">Go to second activity</string>
+    <string name="back_to_main">Go to Main Activity</string>
+    <string name="go_to_activity_3">Go to Third Activity</string>
+    <string name="back_to_activity_2">Go to Second Activity</string>
+    <string name="locationText">Location Unknown</string>
 </resources>
