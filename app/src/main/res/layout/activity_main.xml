@@ -32,9 +32,33 @@
                 android:layout_marginTop="32dp"
                 android:text="Location: Waiting for GPS..."
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@+id/userIdentifierButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/weatherContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@id/textViewLocation"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/weatherIcon"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="Weather Icon" />
+
+                <TextView
+                    android:id="@+id/weatherTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Weather: Loading..."
+                    android:layout_marginStart="8dp"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/userIdentifierButton"
@@ -42,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:text="Enter User ID"
                 android:layout_marginTop="16dp"
-                app:layout_constraintTop_toBottomOf="@id/textViewLocation"
+                app:layout_constraintTop_toBottomOf="@id/weatherContainer"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 

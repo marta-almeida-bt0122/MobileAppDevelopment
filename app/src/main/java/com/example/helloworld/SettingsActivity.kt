@@ -25,21 +25,28 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         val etUserIdentifier: EditText = findViewById(R.id.etUserIdentifier)
+        val etApiKey: EditText = findViewById(R.id.editTextApiKey)
         val btnSave: Button = findViewById(R.id.btnSave)
 
-        // Load existing user identifier
+        // Load existing values
         val savedIdentifier = loadUserIdentifier()
+        val savedApiKey = loadApiKey()
         etUserIdentifier.setText(savedIdentifier)
+        etApiKey.setText(savedApiKey)
 
         // Save button listener
         btnSave.setOnClickListener {
             val userIdentifier = etUserIdentifier.text.toString()
+            val apiKey = etApiKey.text.toString()
+
             if (userIdentifier.isNotBlank()) {
                 saveUserIdentifier(userIdentifier)
-                Toast.makeText(this, "User Identifier saved", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Please enter a User Identifier", Toast.LENGTH_SHORT).show()
             }
+            if (apiKey.isNotBlank()) {
+                saveApiKey(apiKey)
+            }
+
+            Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show()
         }
 
         val btnBackToMain = findViewById<Button>(R.id.btnBackToMainSettings)
@@ -60,6 +67,19 @@ class SettingsActivity : AppCompatActivity() {
     private fun loadUserIdentifier(): String {
         val sharedPreferences = this.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         return sharedPreferences.getString("userIdentifier", "") ?: ""
+    }
+
+    private fun saveApiKey(apiKey: String) {
+        val sharedPreferences = this.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putString("API_KEY", apiKey)
+            apply()
+        }
+    }
+
+    private fun loadApiKey(): String {
+        val sharedPreferences = this.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("API_KEY", "") ?: ""
     }
 }
 

@@ -7,9 +7,12 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import android.Manifest
@@ -23,7 +26,15 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import java.io.File
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.example.helloworld.network.WeatherApiService
+import com.example.helloworld.room.AppDatabase
+import com.example.helloworld.room.CoordinatesEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity(), LocationListener {
 
@@ -32,6 +43,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var locationSwitch: SwitchMaterial
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
+    private lateinit var weatherTextView: TextView
+    private lateinit var weatherIcon: ImageView
+    private lateinit var db: AppDatabase
     var latestLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +53,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        // Initialize UI first
+        try {
+            db = AppDatabase.getDatabase(this)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "DB init error: ${e.message}")
+        }
+
+        // ... existing code...
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -93,6 +115,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
             insets
         }
 
+        weatherTextView = findViewById(R.id.weatherTextView)
+        weatherIcon = findViewById(R.id.weatherIcon)
+        weatherTextView.text = "Weather: Ready"
+
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         locationSwitch = findViewById(R.id.locationSwitch)
@@ -138,12 +164,16 @@ class MainActivity : AppCompatActivity(), LocationListener {
             showUserIdentifierDialog()
         }
 
+        // Check if user identifier is set, but don't force dialog on startup
         val userIdentifier = getUserIdentifier()
-        if (userIdentifier == null) {
-            showUserIdentifierDialog()
-        } else {
-            Toast.makeText(this, "User ID: $userIdentifier", Toast.LENGTH_LONG).show()
+        if (userIdentifier != null) {
+            android.util.Log.d("MainActivity", "User ID: $userIdentifier")
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Only fetch weather if we have internet and a location
     }
 
     private fun startLocationUpdates() {
@@ -161,7 +191,16 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 locationPermissionCode
             )
         } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+            try {
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+                }
+                if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 5f, this)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error requesting location updates: ${e.message}")
+            }
         }
     }
 
@@ -186,18 +225,96 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val textView: TextView = findViewById(R.id.textViewLocation)
         val locationText = getString(R.string.location_text, location.latitude, location.longitude)
         textView.text = locationText
-        saveCoordinatesToFile(location.latitude, location.longitude, location.altitude, System.currentTimeMillis())
-        val toastText = "New location: ${location.latitude}, ${location.longitude}, ${location.altitude}"
-        Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val coordinate = CoordinatesEntity(
+                    timestamp = System.currentTimeMillis(),
+                    latitude = location.latitude,
+                    longitude = location.longitude,
+                    altitude = location.altitude
+                )
+                db.coordinatesDao().insert(coordinate)
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "DB insert error: ${e.message}")
+            }
+        }
+
+        // Only fetch weather if we have a network connection
+        if (isNetworkAvailable()) {
+            getWeatherForecast(location.latitude, location.longitude)
+        }
     }
 
-    private fun saveCoordinatesToFile(latitude: Double, longitude: Double, altitude: Double, timestamp: Long) {
-        val fileName = "gps_coordinates.csv"
-        val file = File(filesDir, fileName)
-        val formattedLatitude = String.format("%.4f", latitude)
-        val formattedLongitude = String.format("%.4f", longitude)
-        val formattedAltitude = String.format("%.2f", altitude)
-        file.appendText("$timestamp;$formattedLatitude;$formattedLongitude;$formattedAltitude\n")
+    private fun getWeatherForecast(lat: Double, lon: Double) {
+        try {
+            val apiKey = getApiKey()
+            if (apiKey.isEmpty()) {
+                weatherTextView.text = "API Key not set"
+                return
+            }
+
+            val retrofit = Retrofit.Builder()
+                .baseUrl("https://api.openweathermap.org/data/2.5/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val service = retrofit.create(WeatherApiService::class.java)
+            val call = service.getWeatherForecast(lat, lon, "metric", apiKey)
+
+            call.enqueue(object : retrofit2.Callback<com.example.helloworld.network.WeatherItem> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.helloworld.network.WeatherItem>,
+                    response: retrofit2.Response<com.example.helloworld.network.WeatherItem>
+                ) {
+                    try {
+                        if (response.isSuccessful) {
+                            val weather = response.body()
+                            if (weather != null) {
+                                val main = weather.main
+                                val weatherCondition = weather.weather[0]
+                                val weatherInfo = "${weather.name}\n${main.temp.toInt()}°C\n${weatherCondition.description}"
+                                weatherTextView.text = weatherInfo
+
+                                val iconUrl = "https://openweathermap.org/img/wn/${weatherCondition.icon}@2x.png"
+                                Glide.with(this@MainActivity)
+                                    .load(iconUrl)
+                                    .override(64, 64)
+                                    .into(weatherIcon)
+                            }
+                        } else {
+                            weatherTextView.text = "Weather unavailable: ${response.code()}"
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("Weather", "Response error: ${e.message}")
+                        weatherTextView.text = "Weather error"
+                    }
+                }
+
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.helloworld.network.WeatherItem>,
+                    t: Throwable
+                ) {
+                    android.util.Log.e("Weather", "Failure: ${t.message}")
+                    weatherTextView.text = "Network error"
+                }
+            })
+        } catch (e: Exception) {
+            android.util.Log.e("Weather", "Exception: ${e.message}")
+            weatherTextView.text = "Error"
+        }
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private fun getApiKey(): String {
+        val sharedPreferences = this.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("API_KEY", "") ?: ""
     }
 
     private fun showUserIdentifierDialog() {
@@ -221,7 +338,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.cancel()
             if (getUserIdentifier() == null) {
-                // No ID set and user cancelled — close the app
                 finish()
             }
         }
@@ -246,3 +362,4 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onProviderEnabled(provider: String) {}
     override fun onProviderDisabled(provider: String) {}
 }
+
