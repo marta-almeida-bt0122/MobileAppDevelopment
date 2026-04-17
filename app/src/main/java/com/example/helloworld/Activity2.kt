@@ -3,10 +3,12 @@ package com.example.helloworld
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import java.io.IOException
 
 class Activity2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,6 +21,9 @@ class Activity2 : AppCompatActivity() {
             insets
         }
 
+        val tvFileContents: TextView = findViewById(R.id.tvFileContents)
+        tvFileContents.text = readFileContents()
+
         val btnBackToMain = findViewById<Button>(R.id.btnBackToMain)
         btnBackToMain.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -29,6 +34,19 @@ class Activity2 : AppCompatActivity() {
         btnGoToActivity3.setOnClickListener {
             val intent = Intent(this, Activity3::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun readFileContents(): String {
+        val fileName = "gps_coordinates.csv"
+        return try {
+            openFileInput(fileName).bufferedReader().useLines { lines ->
+                lines.fold("") { some, text ->
+                    "$some\n$text"
+                }
+            }
+        } catch (e: IOException) {
+            "Error reading file: ${e.message}"
         }
     }
 }
