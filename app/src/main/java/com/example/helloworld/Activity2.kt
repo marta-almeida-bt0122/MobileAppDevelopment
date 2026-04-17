@@ -3,7 +3,7 @@ package com.example.helloworld
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.TextView
+import android.widget.ListView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -23,8 +23,31 @@ class Activity2 : AppCompatActivity() {
             insets
         }
 
-        val tvFileContents: TextView = findViewById(R.id.tvFileContents)
-        tvFileContents.text = readFileContents()
+        val listView: ListView = findViewById(R.id.coordinatesListView)
+        val coordinates = readFileLines()
+        
+        // Add header
+        val headerView = layoutInflater.inflate(R.layout.listview_header, listView, false)
+        listView.addHeaderView(headerView, null, false)
+        
+        val adapter = CoordinatesAdapter(this, coordinates)
+        listView.adapter = adapter
+
+        // Handle item clicks
+        listView.setOnItemClickListener { _, _, position, _ ->
+            val adjustedPosition = position - 1
+            if (adjustedPosition >= 0 && adjustedPosition < coordinates.size) {
+                val item = coordinates[adjustedPosition]
+                val parts = item.split(";")
+                if (parts.size >= 4) {
+                    val intent = Intent(this, Activity3::class.java)
+                    intent.putExtra("latitude", parts[1])
+                    intent.putExtra("longitude", parts[2])
+                    intent.putExtra("altitude", parts[3])
+                    startActivity(intent)
+                }
+            }
+        }
 
         val btnBackToMain = findViewById<Button>(R.id.btnBackToMain)
         btnBackToMain.setOnClickListener {
@@ -39,16 +62,16 @@ class Activity2 : AppCompatActivity() {
         }
     }
 
-    private fun readFileContents(): String {
+    private fun readFileLines(): List<String> {
         val fileName = "gps_coordinates.csv"
         return try {
-            openFileInput(fileName).bufferedReader().useLines { lines ->
-                lines.fold("") { some, text ->
-                    "$some\n$text"
-                }
-            }
+            openFileInput(fileName).bufferedReader().readLines()
         } catch (e: IOException) {
-            "No coordinates saved yet."
+            listOf("No coordinates saved yet.")
         }
     }
 }
+
+
+
+

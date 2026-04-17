@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@android:color/darker_gray"
+    android:padding="8dp">
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Date/Time"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Latitude"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Longitude"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Altitude"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:gravity="center" />
+
+</LinearLayout>
+

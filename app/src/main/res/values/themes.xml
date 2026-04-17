@@ -1,9 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Helloworld" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.Helloworld" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/purple_primary</item>
+        <item name="colorPrimaryDark">@color/purple_dark</item>
+        <item name="colorAccent">@color/purple_light</item>
+        <item name="buttonStyle">@style/PurpleButton</item>
     </style>
 
     <style name="Theme.Helloworld" parent="Base.Theme.Helloworld" />
+
+    <!-- Purple Button Style -->
+    <style name="PurpleButton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:backgroundTint">@color/purple_primary</item>
+    </style>
 </resources>

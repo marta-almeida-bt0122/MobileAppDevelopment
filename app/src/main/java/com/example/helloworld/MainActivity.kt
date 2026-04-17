@@ -14,11 +14,15 @@ import android.widget.TextView
 import android.widget.Toast
 import android.Manifest
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.navigation.NavigationView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import java.io.File
 
 class MainActivity : AppCompatActivity(), LocationListener {
@@ -26,12 +30,63 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var locationManager: LocationManager
     private val locationPermissionCode = 2
     private lateinit var locationSwitch: SwitchMaterial
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navView: NavigationView
     var latestLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navView = findViewById(R.id.nav_view)
+
+        val toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                R.id.nav_second_activity -> {
+                    val intent = Intent(this, Activity2::class.java)
+                    startActivity(intent)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                R.id.nav_open_street_map -> {
+                    if (latestLocation != null) {
+                        val intent = Intent(this, OpenStreetMapsActivity::class.java)
+                        intent.putExtra("latitude", latestLocation!!.latitude)
+                        intent.putExtra("longitude", latestLocation!!.longitude)
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this, "Waiting for location...", Toast.LENGTH_SHORT).show()
+                    }
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                R.id.nav_settings -> {
+                    val intent = Intent(this, SettingsActivity::class.java)
+                    startActivity(intent)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                else -> false
+            }
+        }
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

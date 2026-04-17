@@ -3,6 +3,7 @@ package com.example.helloworld
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -21,11 +22,24 @@ class Activity3 : AppCompatActivity() {
             insets
         }
 
-        val btnBackToActivity2 = findViewById<Button>(R.id.btnBackToActivity2)
+        // Get coordinates from Intent
+        val latitude = intent.getStringExtra("latitude") ?: "N/A"
+        val longitude = intent.getStringExtra("longitude") ?: "N/A"
+        val altitude = intent.getStringExtra("altitude") ?: "N/A"
+
+        // Log coordinates
+        android.util.Log.d("Activity3", "Latitude: $latitude, Longitude: $longitude, Altitude: $altitude")
+
+        // Display coordinates
+        val tvCoordinates: TextView = findViewById(R.id.tvCoordinates)
+        tvCoordinates.text = "Latitude: $latitude\nLongitude: $longitude\nAltitude: $altitude"
+
+        val btnBackToActivity2 = findViewById<Button>(R.id.btnGoToSecondActivity)
         btnBackToActivity2.setOnClickListener {
             val intent = Intent(this, Activity2::class.java)
             startActivity(intent)
-            finish()
         }
     }
 }
+
+

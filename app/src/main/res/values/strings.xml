@@ -8,4 +8,6 @@
     <string name="view_map">View Map</string>
     <string name="enable_location">Enable Location</string>
     <string name="user_id">User ID</string>
+    <string name="navigation_drawer_open">Open Navigation Drawer</string>
+    <string name="navigation_drawer_close">Close Navigation Drawer</string>
 </resources>
