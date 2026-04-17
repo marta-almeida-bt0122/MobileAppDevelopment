@@ -21,26 +21,26 @@ import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
 
-        private val TAG = "MiAppMainActivity"
+        private val TAG = "MyAppMainActivity"
         private lateinit var locationManager: LocationManager
         private lateinit var textViewLocation: TextView
         private var latestLocation: Location? = null
 
-        // Creamos el "lanzador" que mostrará la ventanita preguntando por el permiso
+        // Create the "launcher" that will show the window asking for permission
         private val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                iniciarActualizacionesDeUbicacion()
+                startLocationUpdates()
             } else {
-                Toast.makeText(this, "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
             }
         }
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        Log.d(TAG, "onCreate: La actividad principal se esta creando.")
+        Log.d(TAG, "onCreate: The main activity is being created.")
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.secondActivity)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -52,28 +52,41 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, Activity2::class.java)
             startActivity(intent)
         }
-            // Vincular el TextView (asegúrate de usar el ID que le pusiste en el XML)
+
+        // Button to navigate to the map
+        val mapButton = findViewById<Button>(R.id.mapButton)
+        mapButton.setOnClickListener {
+            if (latestLocation != null) {
+                val intent = Intent(this, OpenStreetMapsActivity::class.java)
+                intent.putExtra("latitude", latestLocation!!.latitude)
+                intent.putExtra("longitude", latestLocation!!.longitude)
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Waiting for location...", Toast.LENGTH_SHORT).show()
+            }
+        }
+            // Bind the TextView (make sure to use the ID you set in the XML)
             textViewLocation = findViewById(R.id.textViewLocation)
 
-            // Inicializar el gestor de ubicación
+            // Initialize the location manager
             locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-            // Comprobar permisos
+            // Check permissions
             checkLocationPermission()
     }
     private fun checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Si no tenemos permiso, lanzamos la ventanita para pedirlo
+            // If we don't have permission, we launch the window to request it
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
-            // Si ya lo tenemos, empezamos a leer el GPS
-            iniciarActualizacionesDeUbicacion()
+            // If we already have it, we start reading the GPS
+            startLocationUpdates()
         }
     }
 
-    private fun iniciarActualizacionesDeUbicacion() {
+    private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // Pedimos actualizaciones: Proveedor GPS, Tiempo (5000 ms = 5s), Distancia (5f = 5 metros)
+            // Request updates: GPS Provider, Time (5000 ms = 5s), Distance (5f = 5 meters)
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 5000L,
@@ -85,9 +98,9 @@ class MainActivity : AppCompatActivity() {
 
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            latestLocation = location // Guardamos la última ubicación
+            latestLocation = location // We save the latest location
 
-            // Escribimos las coordenadas en el TextView de la pantalla
+            // Write the coordinates in the screen TextView
             textViewLocation.text = "Latitude: ${location.latitude}, Longitude: ${location.longitude}"
             Log.i(TAG, "onLocationChanged: New Location [${location.latitude}] [${location.longitude}]")
         }
