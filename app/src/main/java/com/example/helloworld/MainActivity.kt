@@ -8,13 +8,12 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import android.Manifest
+import com.google.android.material.switchmaterial.SwitchMaterial
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -24,17 +23,15 @@ import java.io.File
 
 class MainActivity : AppCompatActivity(), LocationListener {
 
-    private val TAG = "MyAppMainActivity"
     private lateinit var locationManager: LocationManager
     private val locationPermissionCode = 2
-    private lateinit var locationSwitch: Switch
+    private lateinit var locationSwitch: SwitchMaterial
     var latestLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        Log.d(TAG, "onCreate: The main activity is being created.")
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -47,7 +44,16 @@ class MainActivity : AppCompatActivity(), LocationListener {
         locationSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 locationSwitch.text = "Disable location"
-                startLocationUpdates()
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                    startLocationUpdates()
+                } else {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                        locationPermissionCode
+                    )
+                }
             } else {
                 locationSwitch.text = "Enable location"
                 stopLocationUpdates()
@@ -114,6 +120,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+                    locationSwitch.isChecked = true
                 }
             }
         }
@@ -127,7 +134,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         saveCoordinatesToFile(location.latitude, location.longitude, location.altitude, System.currentTimeMillis())
         val toastText = "New location: ${location.latitude}, ${location.longitude}, ${location.altitude}"
         Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show()
-        Log.i(TAG, "onLocationChanged: New Location [${location.latitude}] [${location.longitude}]")
     }
 
     private fun saveCoordinatesToFile(latitude: Double, longitude: Double, altitude: Double, timestamp: Long) {
@@ -158,8 +164,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         }
         builder.setNegativeButton("Cancel") { dialog, _ ->
-            Toast.makeText(this, "Thanks and goodbye!", Toast.LENGTH_LONG).show()
             dialog.cancel()
+            if (getUserIdentifier() == null) {
+                // No ID set and user cancelled — close the app
+                finish()
+            }
         }
         builder.show()
     }
@@ -177,6 +186,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         return sharedPreferences.getString("userIdentifier", null)
     }
 
+    @Suppress("DEPRECATION")
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
     override fun onProviderEnabled(provider: String) {}
     override fun onProviderDisabled(provider: String) {}

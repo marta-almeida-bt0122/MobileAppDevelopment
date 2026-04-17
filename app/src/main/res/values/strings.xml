@@ -1,10 +1,11 @@
 <resources>
-    <string name="app_name">Helloworld</string>
-    <string name="secondActivity">Go to second activity</string>
-    <string name="back_to_main">Go to Main Activity</string>
-    <string name="go_to_activity_3">Go to Third Activity</string>
-    <string name="back_to_activity_2">Go to Second Activity</string>
-    <string name="locationText">Location Unknown</string>
+    <string name="app_name">HelloWorld</string>
+    <string name="view_coordinates">View Coordinates</string>
+    <string name="back_to_main">Back to Main</string>
+    <string name="go_to_activity_3">View Locations</string>
+    <string name="back_to_activity_2">Back to Coordinates</string>
     <string name="location_text">Latitude: %1$.4f, Longitude: %2$.4f</string>
     <string name="view_map">View Map</string>
+    <string name="enable_location">Enable Location</string>
+    <string name="user_id">User ID</string>
 </resources>

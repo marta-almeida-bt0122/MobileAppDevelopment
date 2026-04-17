@@ -11,11 +11,12 @@
         android:id="@+id/textViewLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/locationText"
+        android:layout_marginTop="32dp"
+        android:text="Location: Waiting for GPS..."
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/userIdentifierButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="InvalidId" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/userIdentifierButton"
@@ -41,13 +42,13 @@
         android:id="@+id/mainButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/secondActivity"
+        android:text="@string/view_coordinates"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/mapButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <Switch
+    <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/locationSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
