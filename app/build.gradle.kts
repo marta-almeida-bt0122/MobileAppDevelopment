@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -46,9 +47,7 @@ dependencies {
     // Room dependencies
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    implementation("androidx.room:room-compiler:2.6.1") {
-        exclude(group = "com.intellij", module = "annotations")
-    }
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
 
     // Retrofit dependencies
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -57,7 +56,14 @@ dependencies {
     // Glide
     implementation("com.github.bumptech.glide:glide:4.15.1")
 
+    // Firebase
+    implementation("com.google.firebase:firebase-auth-ktx:22.1.1")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.firebaseui:firebase-ui-auth:8.0.2")
+    implementation("com.google.firebase:firebase-database-ktx:20.3.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
