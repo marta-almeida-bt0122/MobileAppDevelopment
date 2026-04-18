@@ -1,4 +1,4 @@
-# SkinCare Tamagotchi
+# SkinPet 
 
 ## Workspace
 
@@ -108,7 +108,7 @@ Add here a short video demonstrating how the app works and its main features.
 
 ## Participants
 
-* Your Name ([marta.almeida@alumnos.upm.es](mailto:marta.almeida@alumnos.upm.es))
+* Marta Almeida ([marta.almeida@alumnos.upm.es](mailto:marta.almeida@alumnos.upm.es))
 
 Workload distribution: 100%
 
