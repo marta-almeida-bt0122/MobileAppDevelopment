@@ -1,16 +1,6 @@
 <resources>
-    <string name="app_name">HelloWorld</string>
-    <string name="view_coordinates">View Coordinates</string>
-    <string name="back_to_main">Back to Main</string>
-    <string name="go_to_activity_3">View Locations</string>
-    <string name="back_to_activity_2">Back to Coordinates</string>
-    <string name="location_text">Latitude: %1$.4f, Longitude: %2$.4f</string>
-    <string name="view_map">View Map</string>
-    <string name="enable_location">Enable Location</string>
-    <string name="user_id">User ID</string>
-    <string name="navigation_drawer_open">Open Navigation Drawer</string>
-    <string name="navigation_drawer_close">Close Navigation Drawer</string>
+    <string name="app_name">Skintagotchi</string>
     <string name="signed_in">Signed in!</string>
     <string name="signed_out">Signed out!</string>
-    <string name="signed_cancelled">Signed in cancelled</string>
+    <string name="signed_cancelled">Sign-in cancelled</string>
 </resources>

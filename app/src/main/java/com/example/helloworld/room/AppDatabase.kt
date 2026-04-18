@@ -5,10 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [CoordinatesEntity::class], version = 1)
+@Database(
+    entities = [CharacterEntity::class],
+    version = 3,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun coordinatesDao(): ICoordinatesDao
+    abstract fun characterDao(): ICharacterDao
 
     companion object {
         @Volatile
@@ -19,7 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "coordinates_database"
+                    "skintagotchi_database"
                 )
                     .fallbackToDestructiveMigration()
                     .build()
@@ -29,4 +33,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-

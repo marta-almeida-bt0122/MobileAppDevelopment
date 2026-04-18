@@ -62,6 +62,9 @@ dependencies {
     implementation("com.firebaseui:firebase-ui-auth:8.0.2")
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
 
+    // WorkManager for background game ticks
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
