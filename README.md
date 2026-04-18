@@ -27,7 +27,7 @@ The main objective of this project is to promote environmental awareness and hea
 
 ---
 
-## Screenshots and Navigation
+## Navigation
 
 ### Main Activity
 
@@ -97,12 +97,6 @@ Displays a leaderboard comparing users based on their performance.
    * Good conditions → HP increases
 6. Follow the recommendations to maintain your character’s health.
 7. Check history and ranking to track your performance.
-
----
-
-## Demo Video
-
-Add here a short video demonstrating how the app works and its main features.
 
 ---
 
