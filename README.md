@@ -113,3 +113,7 @@ Add here a short video demonstrating how the app works and its main features.
 Workload distribution: 100%
 
 ---
+
+## Releases
+
+- [Latest Release (v1.0)](https://github.com/marta-almeida-bt0122/MobileAppDevelopment/releases)
