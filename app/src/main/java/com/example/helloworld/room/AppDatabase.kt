@@ -6,13 +6,14 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [CharacterEntity::class],
-    version = 3,
+    entities = [CharacterEntity::class, SunscreenLogEntry::class],
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun characterDao(): ICharacterDao
+    abstract fun sunscreenLogDao(): ISunscreenLogDao
 
     companion object {
         @Volatile

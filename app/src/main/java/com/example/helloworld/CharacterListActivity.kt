@@ -14,12 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.helloworld.game.GameEngine
 import com.example.helloworld.game.GameRepository
-import com.example.helloworld.room.CharacterEntity
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
+/** Global leaderboard: every user's total sunscreen points, highest first. */
 class CharacterListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,40 +37,36 @@ class CharacterListActivity : AppCompatActivity() {
         val emptyView = findViewById<TextView>(R.id.tvEmpty)
 
         lifecycleScope.launch {
-            val ranking = GameRepository(this@CharacterListActivity).getRanking()
+            val ranking = GameRepository(this@CharacterListActivity).getGlobalRanking()
             if (ranking.isEmpty()) {
                 emptyView.visibility = View.VISIBLE
                 listView.visibility = View.GONE
             } else {
                 emptyView.visibility = View.GONE
                 listView.visibility = View.VISIBLE
-                listView.adapter = CharacterAdapter(this@CharacterListActivity, ranking)
+                listView.adapter = RankingAdapter(this@CharacterListActivity, ranking)
             }
         }
     }
 
-    private class CharacterAdapter(
+    private class RankingAdapter(
         context: Context,
-        private val items: List<CharacterEntity>
-    ) : ArrayAdapter<CharacterEntity>(context, R.layout.listview_character_item, items) {
+        private val items: List<GameRepository.UserPoints>
+    ) : ArrayAdapter<GameRepository.UserPoints>(context, R.layout.listview_character_item, items) {
 
         private val inflater = LayoutInflater.from(context)
+        private val medals = listOf("🥇", "🥈", "🥉")
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val view = convertView
                 ?: inflater.inflate(R.layout.listview_character_item, parent, false)
             val item = items[position]
-            val skin = GameEngine.skinTypeById(item.skinType)
-            val ageDays = TimeUnit.MILLISECONDS.toDays(
-                System.currentTimeMillis() - item.createdAt
-            )
-            val status = if (item.alive) "alive" else "rest in peace 💀"
+            val medal = medals.getOrElse(position) { "🏅" }
 
-            view.findViewById<TextView>(R.id.tvRowEmoji).text = skin.emoji
-            view.findViewById<TextView>(R.id.tvRowName).text = item.name
-            view.findViewById<TextView>(R.id.tvRowDetails).text =
-                "${skin.label} · $ageDays days · $status"
-            view.findViewById<TextView>(R.id.tvRowScore).text = item.score.toInt().toString()
+            view.findViewById<TextView>(R.id.tvRowEmoji).text = medal
+            view.findViewById<TextView>(R.id.tvRowName).text = item.displayName
+            view.findViewById<TextView>(R.id.tvRowDetails).text = "#${position + 1}"
+            view.findViewById<TextView>(R.id.tvRowScore).text = item.totalPoints.toInt().toString()
             return view
         }
     }

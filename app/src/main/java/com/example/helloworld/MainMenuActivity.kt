@@ -36,6 +36,9 @@ class MainMenuActivity : AppCompatActivity() {
             "Signed in as ${user?.displayName ?: user?.email ?: "-"}"
 
         findViewById<Button>(R.id.btnPlay).setOnClickListener { onPlay() }
+        findViewById<Button>(R.id.btnSunscreen).setOnClickListener {
+            startActivity(Intent(this, SunscreenActivity::class.java))
+        }
         findViewById<Button>(R.id.btnCreate).setOnClickListener {
             startActivity(Intent(this, CreateCharacterActivity::class.java))
         }

@@ -10,11 +10,13 @@ import androidx.work.WorkManager
 import com.example.helloworld.game.GameEngine
 import com.example.helloworld.game.GameNotifier
 import com.example.helloworld.game.GameRepository
+import com.example.helloworld.room.CharacterEntity
 import java.util.concurrent.TimeUnit
 
 /**
- * Background tick: every ~15 minutes, fetch environment, apply drain,
- * push updated state to Firebase, and optionally notify.
+ * Background tick: every ~15 minutes, fetch environment for the last known
+ * location, apply character HP drain if a character exists, and remind the
+ * user to apply sunscreen if UV is high and nothing was logged recently.
  *
  * WorkManager minimum interval is 15 minutes. The user's foreground
  * tick in GameActivity updates more frequently when the screen is open.
@@ -29,43 +31,73 @@ class GameTickWorker(
     override suspend fun doWork(): Result {
         return try {
             val repo = GameRepository(applicationContext)
-            val character = repo.getActiveCharacter() ?: return Result.success()
+            val character = repo.getActiveCharacter()
 
-            val env = repo.fetchEnvironment(character.lastLat, character.lastLon)
+            val location = character?.let { it.lastLat to it.lastLon } ?: cachedLocation()
+                ?: return Result.success()
+
+            val env = repo.fetchEnvironment(location.first, location.second)
                 ?: return Result.retry()
 
-            // minutes elapsed since last update
-            val now = System.currentTimeMillis()
-            val minutesElapsed = ((now - character.lastUpdate) / 60000.0).coerceIn(1.0, 30.0)
-
-            val tick = GameEngine.computeTick(character, env, minutesElapsed)
-            val updated = GameEngine.applyTick(character, tick, now)
-
-            repo.updateCharacter(updated)
-
-            // Notify when a BAD recommendation exists or HP dropped hard
-            val bad = tick.recommendations.firstOrNull {
-                it.severity == GameEngine.Recommendation.Severity.BAD
+            if (character != null) {
+                tickCharacter(repo, character, env)
             }
-            if (bad != null) {
+
+            if (repo.shouldRemindSunscreen(env)) {
                 GameNotifier.notify(
                     applicationContext,
-                    "${updated.name} needs your attention",
-                    bad.text
+                    "High UV right now ☀️",
+                    "UV index is %.1f. Have you applied sunscreen?".format(env.uvIndex)
                 )
             }
-            if (!updated.alive && character.alive) {
-                GameNotifier.notify(
-                    applicationContext,
-                    "${updated.name} has died 💀",
-                    "Final score: ${updated.score.toInt()}. Create a new character."
-                )
-            }
+
             Result.success()
         } catch (e: Exception) {
             Log.e(TAG, "Worker error: ${e.message}")
             Result.retry()
         }
+    }
+
+    private suspend fun tickCharacter(
+        repo: GameRepository,
+        character: CharacterEntity,
+        env: GameEngine.EnvReading
+    ) {
+        if (!character.alive) return
+
+        val now = System.currentTimeMillis()
+        val minutesElapsed = ((now - character.lastUpdate) / 60000.0).coerceIn(1.0, 30.0)
+
+        val tick = GameEngine.computeTick(character, env, minutesElapsed)
+        val updated = GameEngine.applyTick(character, tick, now)
+
+        repo.updateCharacter(updated)
+
+        val bad = tick.recommendations.firstOrNull {
+            it.severity == GameEngine.Recommendation.Severity.BAD
+        }
+        if (bad != null) {
+            GameNotifier.notify(
+                applicationContext,
+                "${updated.name} needs your attention",
+                bad.text
+            )
+        }
+        if (!updated.alive && character.alive) {
+            GameNotifier.notify(
+                applicationContext,
+                "${updated.name} has died 💀",
+                "Final score: ${updated.score.toInt()}. Create a new character."
+            )
+        }
+    }
+
+    private fun cachedLocation(): Pair<Double, Double>? {
+        val prefs = applicationContext.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val lat = prefs.getFloat("last_lat", 0f)
+        val lon = prefs.getFloat("last_lon", 0f)
+        if (lat == 0f && lon == 0f) return null
+        return lat.toDouble() to lon.toDouble()
     }
 
     companion object {
