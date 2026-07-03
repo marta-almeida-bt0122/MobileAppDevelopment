@@ -4,8 +4,8 @@
 
 **Github:**
 
-* Repository: https://github.com/marta-almeida-bt0122/LockerScan
-* Releases: https://github.com/marta-almeida-bt0122/LockerScan/releases
+* Repository: https://github.com/marta-almeida-bt0122/MobileAppDevelopment
+* Releases: https://github.com/marta-almeida-bt0122/MobileAppDevelopment/releases
 
 **Workspace:**
 
@@ -83,4 +83,4 @@ Workload distribution: 100%
 
 ## Releases
 
-- [Latest Release (v1.0)](https://github.com/marta-almeida-bt0122/LockerScan/releases)
+- [Latest Release (v1.0)](https://github.com/marta-almeida-bt0122/MobileAppDevelopment/releases)
