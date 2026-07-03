@@ -7,10 +7,6 @@
 * Repository: https://github.com/marta-almeida-bt0122/MobileAppDevelopment
 * Releases: https://github.com/marta-almeida-bt0122/MobileAppDevelopment/releases
 
-**Workspace:**
-
-* https://upm365.sharepoint.com/sites/MobileAppDevelopment41
-
 ---
 
 ## Description
@@ -33,6 +29,12 @@ Compared to generic habit trackers (which just log a checkbox) or weather apps (
 | **Character (Play)** — the optional HP layer: live UV/temperature/humidity/PM2.5 telemetry and skincare recommendations for the current conditions. | **Sunscreen** — the core loop: fetches live environment data at your location, scores the habit, and logs it. |
 | ![Ranking](img/ranking.png) | ![Settings](img/settings.png) |
 | **Ranking** — global leaderboard comparing every user's total sunscreen points. | **Settings** — update your display name or password (Firebase Authentication). |
+
+---
+
+## Video
+
+https://vimeo.com/1206763308?share=copy&fl=sv&fe=ci
 
 ---
 
