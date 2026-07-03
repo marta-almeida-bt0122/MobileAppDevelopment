@@ -83,15 +83,12 @@ class CreateCharacterActivity : AppCompatActivity() {
     }
 
     private suspend fun lastKnownOrDefault(): Pair<Double, Double> {
-        // Try a fresh GPS/network fix
         val loc = LocationHelper.getFreshLocation(this)
         if (loc != null) return loc.latitude to loc.longitude
-        // Try cached prefs
         val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val cachedLat = prefs.getFloat("last_lat", 0f)
         val cachedLon = prefs.getFloat("last_lon", 0f)
         if (cachedLat != 0f || cachedLon != 0f) return cachedLat.toDouble() to cachedLon.toDouble()
-        // Default: Madrid
         return 40.4168 to -3.7038
     }
 }

@@ -10,10 +10,6 @@ import androidx.core.app.NotificationCompat
 import com.example.helloworld.MainActivity
 import com.example.helloworld.R
 
-/**
- * Lightweight wrapper around NotificationManager.
- * Creates the channel lazily and fires short alerts with tap-to-open.
- */
 object GameNotifier {
 
     private const val CHANNEL_ID = "skintagotchi_alerts"
@@ -45,7 +41,6 @@ object GameNotifier {
         try {
             manager.notify(nextId++, notification)
         } catch (e: SecurityException) {
-            // POST_NOTIFICATIONS permission not granted yet
         }
     }
 

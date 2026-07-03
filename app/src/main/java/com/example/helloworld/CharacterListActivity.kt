@@ -17,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.helloworld.game.GameRepository
 import kotlinx.coroutines.launch
 
-/** Global leaderboard: every user's total sunscreen points, highest first. */
 class CharacterListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

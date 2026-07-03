@@ -13,14 +13,6 @@ import com.example.helloworld.game.GameRepository
 import com.example.helloworld.room.CharacterEntity
 import java.util.concurrent.TimeUnit
 
-/**
- * Background tick: every ~15 minutes, fetch environment for the last known
- * location, apply character HP drain if a character exists, and remind the
- * user to apply sunscreen if UV is high and nothing was logged recently.
- *
- * WorkManager minimum interval is 15 minutes. The user's foreground
- * tick in GameActivity updates more frequently when the screen is open.
- */
 class GameTickWorker(
     context: Context,
     params: WorkerParameters
@@ -111,10 +103,6 @@ class GameTickWorker(
                 ExistingPeriodicWorkPolicy.KEEP,
                 request
             )
-        }
-
-        fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
         }
     }
 }

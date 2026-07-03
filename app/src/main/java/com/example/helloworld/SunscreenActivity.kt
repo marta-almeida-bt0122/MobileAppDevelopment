@@ -17,15 +17,10 @@ import com.example.helloworld.worker.GameTickWorker
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-/**
- * "Apply sunscreen now" screen: grabs GPS + live environment, scores the
- * habit via PointsEngine and stores/syncs the result. Independent of the
- * character/HP layer so it works whether or not the user has a character.
- */
 class SunscreenActivity : AppCompatActivity() {
 
     private val spfOptions = listOf(15, 30, 50, 70)
-    private var spfIndex = 1 // default SPF 30
+    private var spfIndex = 1
 
     private lateinit var repo: GameRepository
 

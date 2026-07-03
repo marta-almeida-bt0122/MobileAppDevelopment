@@ -12,13 +12,6 @@ import android.os.Looper
 import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.suspendCancellableCoroutine
 
-/**
- * getLastKnownLocation() only reads a passive cache: it can be null, or
- * hours/days stale if no app has actively requested a fix recently (this is
- * also what makes emulators get stuck on their boot-time default location).
- * This requests a single fresh fix instead, falling back to the last known
- * location if nothing arrives within [timeoutMs].
- */
 object LocationHelper {
 
     suspend fun getFreshLocation(context: Context, timeoutMs: Long = 5000L): Location? {

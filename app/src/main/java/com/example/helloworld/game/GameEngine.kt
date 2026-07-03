@@ -3,13 +3,8 @@ package com.example.helloworld.game
 import com.example.helloworld.room.CharacterEntity
 import java.util.concurrent.TimeUnit
 
-/**
- * Pure Kotlin game engine. No Android / network dependencies.
- * Handles HP drain, score accumulation, life stage and recommendations.
- */
 object GameEngine {
 
-    // ---- Life stages (days alive) ----
     enum class LifeStage(val emoji: String, val label: String) {
         EGG("🥚",     "Egg"),
         BABY("👶",    "Baby"),
@@ -18,7 +13,6 @@ object GameEngine {
         DEAD("💀",    "Dead")
     }
 
-    // ---- Skin types ----
     data class SkinType(val id: String, val emoji: String, val label: String, val description: String)
 
     val SKIN_TYPES = listOf(
@@ -31,7 +25,6 @@ object GameEngine {
     fun skinTypeById(id: String): SkinType =
         SKIN_TYPES.firstOrNull { it.id == id } ?: SKIN_TYPES[1]
 
-    // ---- Life stage from age ----
     fun lifeStage(character: CharacterEntity, now: Long = System.currentTimeMillis()): LifeStage {
         if (!character.alive || character.hp <= 0.0) return LifeStage.DEAD
         val ageMs = now - character.createdAt
@@ -49,7 +42,6 @@ object GameEngine {
     fun ageInDays(character: CharacterEntity, now: Long = System.currentTimeMillis()): Long =
         TimeUnit.MILLISECONDS.toDays(now - character.createdAt)
 
-    // ---- Character emoji (face based on HP) ----
     fun faceEmoji(hp: Double, alive: Boolean): String = when {
         !alive || hp <= 0 -> "💀"
         hp > 70           -> "😊"
@@ -57,26 +49,20 @@ object GameEngine {
         else              -> "😰"
     }
 
-    // ---- Environmental conditions ----
     data class EnvReading(
         val uvIndex: Double,
         val temperatureC: Double,
         val humidity: Int,
-        val pm25: Double  // µg/m³
+        val pm25: Double
     )
 
     data class Recommendation(val severity: Severity, val text: String) {
         enum class Severity { INFO, WARN, BAD }
     }
 
-    /**
-     * Compute HP drain per minute + recommendations, based on the environment
-     * reading and the skin type. Skin type multipliers make dry skin suffer
-     * more in cold/dry air, oily skin more in heat, etc.
-     */
     data class TickResult(
-        val hpDelta: Double,          // negative = drain
-        val scoreDelta: Double,       // always ≥ 0
+        val hpDelta: Double,
+        val scoreDelta: Double,
         val recommendations: List<Recommendation>
     )
 
@@ -89,7 +75,6 @@ object GameEngine {
         val recs = mutableListOf<Recommendation>()
         var drainPerMinute = 0.0
 
-        // UV — hurts everyone but sensitive skin gets extra
         val uvMult = if (skin.id == "sensitive") 1.5 else 1.0
         when {
             env.uvIndex >= 8 -> {
@@ -109,7 +94,6 @@ object GameEngine {
             }
         }
 
-        // Temperature
         when {
             env.temperatureC >= 30 -> {
                 val mult = if (skin.id == "oily") 1.5 else 1.0
@@ -125,7 +109,6 @@ object GameEngine {
             }
         }
 
-        // Humidity
         when {
             env.humidity < 30 -> {
                 val mult = if (skin.id == "dry") 1.4 else 1.0
@@ -141,7 +124,6 @@ object GameEngine {
             }
         }
 
-        // Air quality (PM2.5)
         when {
             env.pm25 >= 55 -> {
                 drainPerMinute += 1.2
@@ -161,16 +143,11 @@ object GameEngine {
         }
 
         val hpDelta = -drainPerMinute * minutesElapsed
-        // Score: time survived rewards you; bad conditions reward less
         val scoreDelta = minutesElapsed * (1.0 - minOf(drainPerMinute / 5.0, 0.8))
 
         return TickResult(hpDelta, scoreDelta, recs)
     }
 
-    /**
-     * Apply tick to a character and return the updated one.
-     * Caps HP at [0, 100], marks dead if hp <= 0 or lifetime exceeded.
-     */
     fun applyTick(
         character: CharacterEntity,
         result: TickResult,

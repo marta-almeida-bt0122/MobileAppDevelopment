@@ -16,10 +16,6 @@ import com.example.helloworld.game.GameRepository
 import com.example.helloworld.room.CharacterEntity
 import kotlinx.coroutines.launch
 
-/**
- * The main game screen. While in foreground, ticks every 60s, fetches
- * environment (throttled to every 15min) and updates character HP/score.
- */
 class GameActivity : AppCompatActivity() {
 
     private lateinit var repo: GameRepository
@@ -32,7 +28,7 @@ class GameActivity : AppCompatActivity() {
     private var recIndex = 0
 
     private val handler = Handler(Looper.getMainLooper())
-    private val tickInterval = 60_000L  // 60 seconds
+    private val tickInterval = 60_000L
 
     private val tickRunnable = object : Runnable {
         override fun run() {
@@ -78,7 +74,6 @@ class GameActivity : AppCompatActivity() {
         lifecycleScope.launch {
             character = if (characterId != null) {
                 val repo = GameRepository(this@GameActivity)
-                // Simpler: fetch all and find the one (small list)
                 repo.getRanking().firstOrNull { it.id == characterId }
                     ?: repo.getActiveCharacter()
             } else {
@@ -99,7 +94,6 @@ class GameActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val (lat, lon) = currentLocation(char)
 
-            // Fetch environment only every 15 minutes
             val now = System.currentTimeMillis()
             val env = if (lastEnv == null || now - lastEnvFetchMs > envFetchIntervalMs) {
                 val fetched = repo.fetchEnvironment(lat, lon)

@@ -3,10 +3,6 @@ package com.example.helloworld.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * One "I applied sunscreen" event. `id` is the Firebase push key so Room
- * and Firebase stay in sync, mirroring [CharacterEntity].
- */
 @Entity(tableName = "sunscreen_logs")
 data class SunscreenLogEntry(
     @PrimaryKey val id: String,

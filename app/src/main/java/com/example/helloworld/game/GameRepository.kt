@@ -17,11 +17,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
-/**
- * Single point of access to characters. Writes to both Firebase and Room.
- * Room is the source of truth during offline periods; Firebase syncs when
- * online. Last-write-wins (good enough for a student project).
- */
 class GameRepository(context: Context) {
 
     private val TAG = "GameRepository"
@@ -35,7 +30,6 @@ class GameRepository(context: Context) {
     private fun currentUserId(): String? =
         FirebaseAuth.getInstance().currentUser?.uid
 
-    // ---- Create ----
     suspend fun createCharacter(
         name: String,
         skinType: String,
@@ -63,7 +57,6 @@ class GameRepository(context: Context) {
         return entity
     }
 
-    // ---- Read ----
     suspend fun getActiveCharacter(): CharacterEntity? {
         val uid = currentUserId() ?: return null
         return withContext(Dispatchers.IO) { characterDao.getActiveForUser(uid) }
@@ -74,7 +67,6 @@ class GameRepository(context: Context) {
         return withContext(Dispatchers.IO) { characterDao.getRankingForUser(uid) }
     }
 
-    // ---- Update ----
     suspend fun updateCharacter(character: CharacterEntity) {
         withContext(Dispatchers.IO) { characterDao.update(character) }
         pushToFirebase(character)
@@ -102,7 +94,6 @@ class GameRepository(context: Context) {
         }
     }
 
-    // ---- Sunscreen logs / points ----
     suspend fun logSunscreen(lat: Double, lon: Double, spfUsed: Int): SunscreenLogEntry? {
         val uid = currentUserId() ?: return null
         val env = fetchEnvironment(lat, lon) ?: return null
@@ -146,7 +137,6 @@ class GameRepository(context: Context) {
         return withContext(Dispatchers.IO) { sunscreenLogDao.getLastForUser(uid) }
     }
 
-    /** True if the UV right now is high and no sunscreen was logged in the last 2 hours. */
     suspend fun shouldRemindSunscreen(env: GameEngine.EnvReading, now: Long = System.currentTimeMillis()): Boolean {
         if (env.uvIndex < 6.0) return false
         val uid = currentUserId() ?: return false
@@ -155,7 +145,6 @@ class GameRepository(context: Context) {
         return last == null || (now - last.timestamp) > twoHoursMs
     }
 
-    /** Global leaderboard: every user's total points, highest first. */
     suspend fun getGlobalRanking(): List<UserPoints> = suspendCancellableCoroutine { cont ->
         userPointsFirebase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -209,7 +198,6 @@ class GameRepository(context: Context) {
 
     data class UserPoints(val userId: String, val displayName: String, val totalPoints: Double)
 
-    // ---- Fetch environment (Open-Meteo + Air Quality) ----
     suspend fun fetchEnvironment(lat: Double, lon: Double): GameEngine.EnvReading? {
         val weather = fetchWeather(lat, lon) ?: return null
         val pm25 = fetchPm25(lat, lon) ?: 0.0

@@ -7,10 +7,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-/**
- * Open-Meteo Air Quality API — no key, no tier.
- * Docs: https://open-meteo.com/en/docs/air-quality-api
- */
 interface AirQualityApi {
 
     @GET("v1/air-quality")

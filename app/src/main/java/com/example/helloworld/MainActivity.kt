@@ -17,14 +17,6 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 
-/**
- * Launcher / login gate. Responsibilities:
- *   1. Request location + notification permissions.
- *   2. If the user is already signed in, go to MainMenuActivity.
- *   3. Otherwise, launch the Firebase Auth UI.
- *
- * All other screens live behind an authenticated session.
- */
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"

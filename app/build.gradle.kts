@@ -49,29 +49,22 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.osmdroid)
 
-    // Room dependencies
     implementation("androidx.room:room-runtime:2.7.1")
     implementation("androidx.room:room-ktx:2.7.1")
     kapt("androidx.room:room-compiler:2.7.1")
 
-    // Retrofit dependencies
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // Glide
     implementation("com.github.bumptech.glide:glide:4.15.1")
 
-    // Firebase
     implementation("com.google.firebase:firebase-auth-ktx:22.1.1")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.firebaseui:firebase-ui-auth:8.0.2")
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
 
-    // WorkManager for background game ticks
     implementation("androidx.work:work-runtime-ktx:2.9.0")
 
-    // Coroutines (also arrive transitively via work-runtime-ktx, but GameRepository
-    // and GameTickWorker depend on them directly)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     testImplementation(libs.junit)

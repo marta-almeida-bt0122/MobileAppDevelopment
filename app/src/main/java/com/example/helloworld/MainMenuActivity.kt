@@ -15,9 +15,6 @@ import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
-/**
- * Landing screen after a successful login. Offers the 5 main actions.
- */
 class MainMenuActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +49,6 @@ class MainMenuActivity : AppCompatActivity() {
     }
 
     private fun onPlay() {
-        // Check if the user has an active character; if not, redirect to Create
         val repo = GameRepository(this)
         lifecycleScope.launch {
             val active = repo.getActiveCharacter()
