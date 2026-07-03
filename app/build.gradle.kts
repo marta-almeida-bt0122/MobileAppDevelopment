@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.services)
+    kotlin("android")
+    kotlin("kapt")
 }
 
 android {
@@ -34,6 +36,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
@@ -45,9 +50,9 @@ dependencies {
     implementation(libs.osmdroid)
 
     // Room dependencies
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-ktx:2.7.1")
+    kapt("androidx.room:room-compiler:2.7.1")
 
     // Retrofit dependencies
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -64,6 +69,10 @@ dependencies {
 
     // WorkManager for background game ticks
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // Coroutines (also arrive transitively via work-runtime-ktx, but GameRepository
+    // and GameTickWorker depend on them directly)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
