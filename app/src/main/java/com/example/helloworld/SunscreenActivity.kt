@@ -1,10 +1,6 @@
 package com.example.helloworld
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -74,15 +70,17 @@ class SunscreenActivity : AppCompatActivity() {
     }
 
     private fun applySunscreen() {
-        val location = currentLocation()
-        if (location == null) {
-            Toast.makeText(this, "Location unavailable. Enable GPS and try again.", Toast.LENGTH_SHORT).show()
-            return
-        }
         val btnApply = findViewById<Button>(R.id.btnApply)
         btnApply.isEnabled = false
 
         lifecycleScope.launch {
+            val location = currentLocation()
+            if (location == null) {
+                Toast.makeText(this@SunscreenActivity, "Location unavailable. Enable GPS and try again.", Toast.LENGTH_SHORT).show()
+                btnApply.isEnabled = true
+                return@launch
+            }
+
             val entry = repo.logSunscreen(location.first, location.second, spfOptions[spfIndex])
             btnApply.isEnabled = true
             if (entry != null) {
@@ -116,23 +114,14 @@ class SunscreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun currentLocation(): Pair<Double, Double>? {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
-            try {
-                val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                val loc: Location? =
-                    lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                        ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                if (loc != null) {
-                    getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
-                        .putFloat("last_lat", loc.latitude.toFloat())
-                        .putFloat("last_lon", loc.longitude.toFloat())
-                        .apply()
-                    return loc.latitude to loc.longitude
-                }
-            } catch (_: Exception) {
-            }
+    private suspend fun currentLocation(): Pair<Double, Double>? {
+        val loc = LocationHelper.getFreshLocation(this)
+        if (loc != null) {
+            getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
+                .putFloat("last_lat", loc.latitude.toFloat())
+                .putFloat("last_lon", loc.longitude.toFloat())
+                .apply()
+            return loc.latitude to loc.longitude
         }
         val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val cachedLat = prefs.getFloat("last_lat", 0f)

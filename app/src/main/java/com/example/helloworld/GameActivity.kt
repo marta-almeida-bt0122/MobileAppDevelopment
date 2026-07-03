@@ -1,19 +1,13 @@
 package com.example.helloworld
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +22,6 @@ import kotlinx.coroutines.launch
  */
 class GameActivity : AppCompatActivity() {
 
-    private val TAG = "GameActivity"
     private lateinit var repo: GameRepository
     private var character: CharacterEntity? = null
     private var lastEnv: GameEngine.EnvReading? = null
@@ -103,9 +96,9 @@ class GameActivity : AppCompatActivity() {
             return
         }
 
-        val (lat, lon) = currentLocation(char)
-
         lifecycleScope.launch {
+            val (lat, lon) = currentLocation(char)
+
             // Fetch environment only every 15 minutes
             val now = System.currentTimeMillis()
             val env = if (lastEnv == null || now - lastEnvFetchMs > envFetchIntervalMs) {
@@ -176,24 +169,14 @@ class GameActivity : AppCompatActivity() {
         renderRecommendation()
     }
 
-    private fun currentLocation(char: CharacterEntity): Pair<Double, Double> {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
-            try {
-                val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                val loc: Location? =
-                    lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                        ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                if (loc != null) {
-                    getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
-                        .putFloat("last_lat", loc.latitude.toFloat())
-                        .putFloat("last_lon", loc.longitude.toFloat())
-                        .apply()
-                    return loc.latitude to loc.longitude
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Location error: ${e.message}")
-            }
+    private suspend fun currentLocation(char: CharacterEntity): Pair<Double, Double> {
+        val loc = LocationHelper.getFreshLocation(this)
+        if (loc != null) {
+            getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
+                .putFloat("last_lat", loc.latitude.toFloat())
+                .putFloat("last_lon", loc.longitude.toFloat())
+                .apply()
+            return loc.latitude to loc.longitude
         }
         return char.lastLat to char.lastLon
     }

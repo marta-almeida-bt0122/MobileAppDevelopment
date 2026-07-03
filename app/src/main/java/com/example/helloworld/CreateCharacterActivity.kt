@@ -1,11 +1,7 @@
 package com.example.helloworld
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -13,7 +9,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -66,9 +61,9 @@ class CreateCharacterActivity : AppCompatActivity() {
             return
         }
         val skin = types[currentIndex]
-        val (lat, lon) = lastKnownOrDefault()
 
         lifecycleScope.launch {
+            val (lat, lon) = lastKnownOrDefault()
             val character = GameRepository(this@CreateCharacterActivity)
                 .createCharacter(name, skin.id, lat, lon)
             if (character != null) {
@@ -87,18 +82,10 @@ class CreateCharacterActivity : AppCompatActivity() {
         }
     }
 
-    private fun lastKnownOrDefault(): Pair<Double, Double> {
-        // Try GPS
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
-            try {
-                val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                val loc: Location? =
-                    lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                        ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                if (loc != null) return loc.latitude to loc.longitude
-            } catch (_: Exception) {}
-        }
+    private suspend fun lastKnownOrDefault(): Pair<Double, Double> {
+        // Try a fresh GPS/network fix
+        val loc = LocationHelper.getFreshLocation(this)
+        if (loc != null) return loc.latitude to loc.longitude
         // Try cached prefs
         val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val cachedLat = prefs.getFloat("last_lat", 0f)
