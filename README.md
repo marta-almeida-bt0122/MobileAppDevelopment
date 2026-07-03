@@ -1,4 +1,4 @@
-# SkinPet 
+# Skintagotchi
 
 ## Workspace
 
@@ -15,43 +15,24 @@
 
 ## Description
 
-This application has been developed to raise awareness about environmental conditions and their impact on skin health through a gamified experience.
+Skintagotchi is a gamified skincare companion. Instead of tracking abstract stats, it rewards a real, daily habit — applying sunscreen — by scoring it against the actual environmental conditions at the user's location and time of day: the current UV index, temperature, and how risky the hour of application is (protecting yourself at solar noon is worth more than at 9am). Consistency is rewarded too: a streak multiplier grows the longer you keep the habit up, and resets if a day is skipped.
 
-SkinCare Tamagotchi allows users to create a virtual skin character (e.g., dry, oily, or mixed skin type). The character's health (HP) dynamically changes based on real-time environmental data obtained from external APIs, including UV radiation, temperature, humidity, and air quality.
+On top of the points system, the app keeps an optional virtual skin character (egg → baby → adult) whose HP reacts to the same live environmental data (UV, temperature, humidity, air quality), giving instant, playful feedback on days when conditions are harsh — similar in spirit to a Tamagotchi, but grounded in real weather data instead of arbitrary timers.
 
-The app uses the user’s location to collect environmental data and evaluates how these conditions affect the skin. Based on this, the system provides personalized skincare recommendations (e.g., using sunscreen, hydration, or protection measures).
-
-All interactions and environmental impacts are stored, allowing users to track their skin character evolution over time. Additionally, a ranking system compares users based on how well they maintain their character’s health.
-
-The main objective of this project is to promote environmental awareness and healthy habits using gamification techniques.
+Compared to generic habit trackers (which just log a checkbox) or weather apps (which show data but don't reward acting on it), Skintagotchi ties the two together: the environmental reading *is* the scoring input, so the incentive to act is strongest exactly when it matters most.
 
 ---
 
-## Navigation
+## Screenshots and navigation
 
-### Main Activity
-
-Displays the current status of the skin character, including HP, environmental conditions, and recommendations.
-
-### Navigation Menu
-
-Navigation Drawer to access all sections of the application.
-
-### Profile
-
-Shows user data and global score.
-
-### Today's Activity
-
-Displays real-time environmental data such as UV index, temperature, humidity, and air quality, along with skincare recommendations.
-
-### Skin History
-
-Shows historical data of the skin character (HP evolution and past environmental conditions).
-
-### Ranking
-
-Displays a leaderboard comparing users based on their performance.
+| Screenshot | Screenshot |
+|---|---|
+| ![Main menu](img/mainscreen.png) | ![Create character](img/charactercreated.png) |
+| **Main menu** — entry point after login, with quick access to Play, Sunscreen, Create Character, Ranking and Settings. | **Create character** — pick a skin type (dry, mixed, oily, sensitive) and name your character. |
+| ![Character / Play screen](img/character.png) | ![Sunscreen screen](img/sunscreen.png) |
+| **Character (Play)** — the optional HP layer: live UV/temperature/humidity/PM2.5 telemetry and skincare recommendations for the current conditions. | **Sunscreen** — the core loop: fetches live environment data at your location, scores the habit, and logs it. |
+| ![Ranking](img/ranking.png) | ![Settings](img/settings.png) |
+| **Ranking** — global leaderboard comparing every user's total sunscreen points. | **Settings** — update your display name or password (Firebase Authentication). |
 
 ---
 
@@ -59,44 +40,36 @@ Displays a leaderboard comparing users based on their performance.
 
 ### Functional Features
 
-* Skin character creation (dry, oily, mixed)
-* Real-time environmental monitoring (UV, temperature, humidity, air quality)
-* Dynamic HP system based on environmental conditions
-* Personalized skincare recommendations
-* Notifications when conditions are harmful
-* Ranking system between users
-* Historical tracking of skin conditions and character evolution
+* Log "applied sunscreen" and earn points based on live UV index, temperature, time of day and streak
+* Consecutive-day streak with a growing multiplier that resets if a day is skipped
+* Global ranking comparing all users by total points
+* Optional virtual skin character (dry / mixed / oily / sensitive) with an HP stat driven by the same live environmental data
+* Personalized skincare recommendations based on current conditions
+* Background reminder notification when UV is high and no sunscreen has been logged recently
 
 ### Technical Features
 
-* Firebase Authentication (Google / Email login)
-* Firebase Realtime Database (user data, ranking, character state)
-* Room Database (local persistence of history)
-* RESTful APIs:
-
-  * OpenWeather API (temperature, humidity)
-  * Open-Meteo API (UV index, air quality)
-* Retrofit (API communication)
-* Navigation Drawer (UI navigation)
-* RecyclerView (data visualization)
-* GPS location (device sensors)
-* Notification system (alerts based on environmental conditions)
+* Firebase Authentication (email/password, via FirebaseUI)
+* Firebase Realtime Database (points sync, global ranking, character state)
+* Room database (local persistence of the character and sunscreen log history)
+* Retrofit + Gson for API communication
+* RESTful APIs (no API key required):
+  * [Open-Meteo Forecast API](https://open-meteo.com/en/docs) — UV index, temperature, humidity
+  * [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) — PM2.5
+* WorkManager (periodic background environment check + reminder notifications)
+* GPS location (fresh single-fix request, not just the last cached location)
+* Notification system (alerts for high UV / low HP / character events)
+* Glide (image loading)
 
 ---
 
 ## How to Use
 
-1. Launch the application.
-2. Log in using email or Google authentication.
-3. Create your skin character by selecting a skin type.
-4. The app automatically retrieves environmental data based on your location.
-5. The skin character’s health (HP) changes depending on conditions:
-
-   * High UV → HP decreases
-   * Extreme temperature → HP decreases
-   * Good conditions → HP increases
-6. Follow the recommendations to maintain your character’s health.
-7. Check history and ranking to track your performance.
+1. Launch the application and sign in (or sign up) with email and password.
+2. From the main menu, tap **Sunscreen** to log your habit: the app fetches your GPS location, reads the live UV index and temperature, and awards points.
+3. Check **Ranking** to see how your total points compare with other users.
+4. Optionally, tap **Create Character** to start a virtual skin character; its HP reacts to the same environmental data over time. Tap **Play** to check on it.
+5. Use **Settings** to change your display name or password.
 
 ---
 
